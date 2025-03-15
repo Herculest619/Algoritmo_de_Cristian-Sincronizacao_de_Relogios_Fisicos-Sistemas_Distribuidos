@@ -19,6 +19,7 @@ UPDATE_INTERVAL = 10
 def update_time_periodically():
     """
     Função que atualiza a hora via NTP periodicamente, ajustando o atraso da rede.
+    
     """
     global current_time
     client = ntplib.NTPClient()
