@@ -1,4 +1,5 @@
 Instale as dependências necessárias:
 
-bash
+```bash
 pip install ntplib
+```
