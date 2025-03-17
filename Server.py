@@ -14,7 +14,7 @@ current_time = None
 # Lock para garantir acesso seguro à variável global
 time_lock = Lock()
 # Intervalo de atualização da hora via NTP (em segundos)
-UPDATE_INTERVAL = 10
+UPDATE_INTERVAL = 60
 
 def update_time_periodically():
     """
@@ -28,6 +28,7 @@ def update_time_periodically():
         try:
             response = client.request('pool.ntp.org')
             ntp_time = response.tx_time  # Hora recebida do servidor NTP
+            print("\n\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
             print("Hora recebida em segundos:", ntp_time)
 
             offset = response.offset  # Atraso da rede (offset) = RTT/2
@@ -37,9 +38,10 @@ def update_time_periodically():
             adjusted_time = ntp_time + offset
 
             with time_lock:
-                current_time = adjusted_time  # Armazena o tempo ajustado em segundos
+                current_time = adjusted_time  # Atualiza a hora atual ajustada
 
             print("Hora atualizada via NTP (ajustada):", datetime.fromtimestamp(adjusted_time, timezone.utc))
+            print("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
             print("\n")
 
         except Exception as error:
@@ -57,6 +59,12 @@ def get_current_time():
             return None
         # Calcula o tempo decorrido desde a última sincronização
         elapsed_time = time.time() - current_time
+        
+        print("\nHora local:", datetime.fromtimestamp(time.time(), timezone.utc))
+        print("Hora atualizada:", datetime.fromtimestamp(current_time, timezone.utc))
+        print("Tempo decorrido desde a última sincronização:", elapsed_time)
+        print("Hora atual ajustada:", datetime.fromtimestamp(current_time + elapsed_time, timezone.utc))
+
         return current_time + elapsed_time
 
 def on_new_client(clientsocket, addr):
@@ -69,7 +77,7 @@ def on_new_client(clientsocket, addr):
             if not data:  # Se não receber dados, encerra a conexão
                 break
             texto_recebido = data.decode('utf-8')  # Converte os bytes em string
-            print('\nRecebido do cliente {} na porta {}: {}'.format(addr[0], addr[1], texto_recebido))  # Imprime o texto recebido
+            print('Recebido do cliente {} na porta {}: {}'.format(addr[0], addr[1], texto_recebido))  # Imprime o texto recebido
 
             # Responde ao cliente com a hora atual ajustada ou uma mensagem personalizada
             if texto_recebido.lower() == 'hora':
@@ -93,6 +101,7 @@ def on_new_client(clientsocket, addr):
 def main(argv):
     try:
         # Inicia a thread para atualizar a hora periodicamente
+        # Inicia antes para evitar que o cliente receba hora nula   
         time_thread = Thread(target=update_time_periodically)
         time_thread.daemon = True  # Thread encerra quando o programa principal terminar
         time_thread.start()
@@ -101,7 +110,7 @@ def main(argv):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
             server_socket.bind((HOST, PORT))
             server_socket.listen()
-            print(f"Servidor escutando em {HOST}:{PORT}...")
+            print(f"\nServidor escutando em {HOST}:{PORT}...")
 
             while True:
                 clientsocket, addr = server_socket.accept()
