@@ -11,15 +11,25 @@ BUFFER_SIZE = 1024  # Tamanho do buffer para recepção dos dados
 
 # Variável global para armazenar a hora atual ajustada
 current_time = None
+# Intervalo de atualização da hora via NTP (em segundos)
+UPDATE_INTERVAL = 600
 # Lock para garantir acesso seguro à variável global
 time_lock = Lock()
-# Intervalo de atualização da hora via NTP (em segundos)
-UPDATE_INTERVAL = 60
+
+def increment_current_time():
+    """
+    Função que incrementa a current_time manualmente, simulando a passagem do tempo.
+    """
+    global current_time
+    while True:
+        with time_lock:
+            if current_time is not None:
+                current_time += 1  # Incrementa 1 segundo
+        time.sleep(1)  # Espera 1 segundo antes de incrementar novamente
 
 def update_time_periodically():
     """
     Função que atualiza a hora via NTP periodicamente, ajustando o atraso da rede.
-    
     """
     global current_time
     client = ntplib.NTPClient()
@@ -51,21 +61,13 @@ def update_time_periodically():
 
 def get_current_time():
     """
-    Retorna o tempo atual ajustado, considerando o tempo decorrido desde a última sincronização.
+    Retorna o tempo atual ajustado.
     """
     global current_time
     with time_lock:
         if current_time is None:
             return None
-        # Calcula o tempo decorrido desde a última sincronização
-        elapsed_time = time.time() - current_time
-        
-        print("\nHora local:", datetime.fromtimestamp(time.time(), timezone.utc))
-        print("Hora atualizada:", datetime.fromtimestamp(current_time, timezone.utc))
-        print("Tempo decorrido desde a última sincronização:", elapsed_time)
-        print("Hora atual ajustada:", datetime.fromtimestamp(current_time + elapsed_time, timezone.utc))
-
-        return current_time + elapsed_time
+        return current_time
 
 def on_new_client(clientsocket, addr):
     """
@@ -101,10 +103,14 @@ def on_new_client(clientsocket, addr):
 def main(argv):
     try:
         # Inicia a thread para atualizar a hora periodicamente
-        # Inicia antes para evitar que o cliente receba hora nula   
         time_thread = Thread(target=update_time_periodically)
         time_thread.daemon = True  # Thread encerra quando o programa principal terminar
         time_thread.start()
+
+        # Inicia a thread para incrementar a current_time manualmente
+        increment_thread = Thread(target=increment_current_time)
+        increment_thread.daemon = True  # Thread encerra quando o programa principal terminar
+        increment_thread.start()
 
         # Configura o socket para aceitar conexões
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:

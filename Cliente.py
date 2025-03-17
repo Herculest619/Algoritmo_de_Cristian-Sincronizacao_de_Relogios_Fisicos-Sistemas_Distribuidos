@@ -6,8 +6,25 @@ HOST = '127.0.0.1'  # Endereço IP do servidor
 PORT = 20000        # Porta do servidor
 BUFFER_SIZE = 1024  # Tamanho do buffer
 
+# Variável global para simular o tempo local
+hora_local = time.time()  # Inicializa o tempo local com o tempo atual
+
+def incrementar_tempo_local():
+    """
+    Função que incrementa o tempo local manualmente, simulando a passagem do tempo.
+    """
+    global hora_local
+    while True:
+        hora_local += 1  # Incrementa 1 segundo
+        time.sleep(1)  # Espera 1 segundo antes de incrementar novamente
+
 def main():
+    global hora_local
     try:
+        # Inicia a thread para incrementar o tempo local
+        import threading
+        threading.Thread(target=incrementar_tempo_local, daemon=True).start()
+
         # Cria um socket TCP/IP
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
             # Conecta ao servidor
@@ -16,12 +33,12 @@ def main():
 
             while True:
                 # Envia a mensagem 'hora' ao servidor e registra o tempo de envio
-                start_time = time.time()
+                start_time = hora_local
                 client_socket.send(b'hora')
 
                 # Recebe a resposta do servidor
                 data = client_socket.recv(BUFFER_SIZE)
-                end_time = time.time()
+                end_time = hora_local
 
                 # Decodifica a resposta do servidor
                 server_time_str = data.decode('utf-8')
@@ -42,26 +59,29 @@ def main():
                 # Exibe o tempo ajustado
                 print("Tempo recebido do servidor (timestamp):", server_time)
                 print("RTT calculado:", rtt)
-                #print("Tempo ajustado (algoritmo de Cristian):", adjusted_time)
 
                 # Ajuste gradual do relógio
-                current_time = time.time()
-                time_difference = adjusted_time - current_time
+                time_difference = adjusted_time - hora_local
 
                 if time_difference > 0:
-                    print("Relógio está atrasado. Ajustando gradualmente...")
-                    # Adianta o relógio gradualmente
-                    time.sleep(time_difference / 2)  # Ajuste gradual
+                    print("Adiantando relógio em", time_difference, "segundos")
+                    hora_local += time_difference / 2  # Ajuste gradual
+                    print("Hora local:", datetime.fromtimestamp(hora_local, timezone.utc))
+                    print("\n")
                 elif time_difference < 0:
-                    print("Relógio está adiantado. Ajustando gradualmente...")
-                    # Atrasa o relógio gradualmente
-                    time.sleep(abs(time_difference) / 2)  # Ajuste gradual
+                    print("Atrasando relógio em", abs(time_difference), "segundos") #abs = valor absoluto
+                    hora_local += time_difference / 2  # Ajuste gradual
+                    print("Hora local:", datetime.fromtimestamp(hora_local, timezone.utc))
+                    print("\n")
+                else:
+                    print("Relógio sincronizado")
+                    time.sleep(60)  # Aguarda 1 minuto antes de sincronizar novamente
 
-                time.sleep(3)
+                #time.sleep(1)
     except Exception as error:
         print(f"Erro na conexão com o servidor: {error}")
-        print("Tentando novamente em 5 segundos...")
-        time.sleep(5)
+        print("Tentando novamente em 15 segundos...")
+        time.sleep(15)
         main()
 
 if __name__ == "__main__":
