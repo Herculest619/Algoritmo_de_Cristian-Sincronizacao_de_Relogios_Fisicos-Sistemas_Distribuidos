@@ -1,5 +1,6 @@
 # Sincronização de Relógios
-Este projeto implementa um sistema de sincronização de relógios usando um servidor e múltiplos clientes. O servidor sincroniza o tempo com um servidor NTP e os clientes ajustam seus relógios com base no tempo recebido do servidor.
+Este projeto implementa um sistema de sincronização de relógios usando um servidor e múltiplos clientes.  
+O servidor sincroniza o tempo com um servidor NTP e os clientes ajustam seus relógios com base no tempo recebido do servidor.
 
 
 ## Opção 1: Rodar Localmente
@@ -13,7 +14,7 @@ Execute o servidor:
 ```bash
 python Server.py
 ```
-Execute os clientes:
+Execute os clientes:  
 Abra terminais separados para cada cliente e execute:
 
 ```bash
@@ -29,9 +30,9 @@ docker-compose up --build
 ```
 ### Isso criará e iniciará os seguintes containers:
 
-server: Servidor que sincroniza o tempo com um servidor NTP.
+**server:** Servidor que sincroniza o tempo com um servidor NTP.
 
-client1, client2, client3, client4: Clientes que se conectam ao servidor para sincronizar seus relógios.
+**client1, client2, client3, client4:** Clientes que se conectam ao servidor para sincronizar seus relógios.
 
 ### Verifique os logs dos containers:
 Para visualizar os logs de cada container em tempo real, use os seguintes comandos:
