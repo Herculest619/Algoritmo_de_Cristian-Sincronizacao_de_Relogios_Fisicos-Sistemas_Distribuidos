@@ -5,7 +5,8 @@ from datetime import datetime, timezone
 from threading import Thread, Lock
 import time
 
-HOST = 'server'  # Endereço IP Localhost
+HOST = 'server'  # Endereço IP do servidor (usado no Docker)
+# HOST = '127.0.0.1'  # Endereço IP Localhost
 PORT = 20000        # Porta utilizada pelo servidor
 BUFFER_SIZE = 1024  # Tamanho do buffer para recepção dos dados
 
@@ -123,6 +124,7 @@ def main(argv):
                 print('\nConectado ao cliente no endereço:', addr)
                 client_thread = Thread(target=on_new_client, args=(clientsocket, addr))
                 client_thread.start()  # Inicia uma nova thread para tratar o cliente
+                
     except Exception as error:
         print("\nErro na execução do servidor!!")
         print(error)

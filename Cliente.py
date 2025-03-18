@@ -1,10 +1,14 @@
 import socket
 import time
+from math import sqrt
+import math
 from datetime import datetime, timezone
 
-HOST = 'server'  # Endereço IP do servidor
+HOST = 'server'  # Endereço IP do servidor (usado no Docker)
+# HOST = '127.0.0.1'  # Endereço IP Localhost
 PORT = 20000        # Porta do servidor
 BUFFER_SIZE = 1024  # Tamanho do buffer
+SLEEPTIME = 15      # Tempo de espera entre as sincronizações
 
 # Variável global para simular o tempo local
 hora_local = time.time()  # Inicializa o tempo local com o tempo atual
@@ -63,21 +67,27 @@ def main():
                 # Ajuste gradual do relógio
                 time_difference = adjusted_time - hora_local
 
-                if time_difference > 0:
-                    print("Adiantando relógio em", time_difference, "segundos")
-                    hora_local += time_difference * 0.9  # Ajuste gradual
-                    print("Hora local:", datetime.fromtimestamp(hora_local, timezone.utc))
-                    print("\n")
-                elif time_difference < 0:
-                    print("Atrasando relógio em", abs(time_difference), "segundos") #abs = valor absoluto
-                    hora_local += time_difference * 0.9  # Ajuste gradual
-                    print("Hora local:", datetime.fromtimestamp(hora_local, timezone.utc))
-                    print("\n")
-                else:
-                    print("Relógio sincronizado")
-                    time.sleep(60)  # Aguarda 1 minuto antes de sincronizar novamente
+                # Define um limite para considerar o relógio sincronizado
+                sync_threshold = 0.001 
 
-                time.sleep(0.1)
+                if abs(time_difference) > sync_threshold:
+                    # Calcula o número de passos necessários
+                    steps = max(1, int(abs(time_difference) / 0.1))  # Garante que steps seja pelo menos 1
+                    step_size = time_difference / steps
+
+                    print(f"Ajustando relógio em {steps} passos de {step_size:.6f} segundos cada")
+
+                    for _ in range(steps):
+                        hora_local += step_size
+                        #print("Hora local:", datetime.fromtimestamp(hora_local, timezone.utc))
+                        #time.sleep(0.1)  # Aguarda um pouco entre os passos
+
+                    print("Relógio ajustado. Hora local:", datetime.fromtimestamp(hora_local, timezone.utc),  "\n\n")
+                    time.sleep(SLEEPTIME)
+                else:
+                    print("Relógio sincronizado\n\n")
+                    time.sleep(SLEEPTIME)
+
     except Exception as error:
         print(f"Erro na conexão com o servidor: {error}")
         print("Tentando novamente em 15 segundos...")
