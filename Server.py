@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from threading import Thread, Lock
 import time
 
-HOST = '127.0.0.1'  # Endereço IP Localhost
+HOST = 'server'  # Endereço IP Localhost
 PORT = 20000        # Porta utilizada pelo servidor
 BUFFER_SIZE = 1024  # Tamanho do buffer para recepção dos dados
 
@@ -24,8 +24,8 @@ def increment_current_time():
     while True:
         with time_lock:
             if current_time is not None:
-                current_time += 1  # Incrementa 1 segundo
-        time.sleep(1)  # Espera 1 segundo antes de incrementar novamente
+                current_time += 0.001  # Incrementa 0.001 segundo
+        time.sleep(0.001)
 
 def update_time_periodically():
     """

@@ -2,7 +2,7 @@ import socket
 import time
 from datetime import datetime, timezone
 
-HOST = '127.0.0.1'  # Endereço IP do servidor
+HOST = 'server'  # Endereço IP do servidor
 PORT = 20000        # Porta do servidor
 BUFFER_SIZE = 1024  # Tamanho do buffer
 
@@ -15,8 +15,8 @@ def incrementar_tempo_local():
     """
     global hora_local
     while True:
-        hora_local += 1  # Incrementa 1 segundo
-        time.sleep(1)  # Espera 1 segundo antes de incrementar novamente
+        hora_local += 0.001  # Incrementa 0.001 segundo
+        time.sleep(0.001)  # Espera 0.001 segundo antes de incrementar novamente
 
 def main():
     global hora_local
@@ -65,19 +65,19 @@ def main():
 
                 if time_difference > 0:
                     print("Adiantando relógio em", time_difference, "segundos")
-                    hora_local += time_difference / 2  # Ajuste gradual
+                    hora_local += time_difference * 0.9  # Ajuste gradual
                     print("Hora local:", datetime.fromtimestamp(hora_local, timezone.utc))
                     print("\n")
                 elif time_difference < 0:
                     print("Atrasando relógio em", abs(time_difference), "segundos") #abs = valor absoluto
-                    hora_local += time_difference / 2  # Ajuste gradual
+                    hora_local += time_difference * 0.9  # Ajuste gradual
                     print("Hora local:", datetime.fromtimestamp(hora_local, timezone.utc))
                     print("\n")
                 else:
                     print("Relógio sincronizado")
                     time.sleep(60)  # Aguarda 1 minuto antes de sincronizar novamente
 
-                #time.sleep(1)
+                time.sleep(0.1)
     except Exception as error:
         print(f"Erro na conexão com o servidor: {error}")
         print("Tentando novamente em 15 segundos...")

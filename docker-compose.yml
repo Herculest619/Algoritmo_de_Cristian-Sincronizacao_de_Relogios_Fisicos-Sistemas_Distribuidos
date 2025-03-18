@@ -1,0 +1,37 @@
+services:
+  server:
+    build: .
+    container_name: server
+    command: python -u Server.py
+    ports:
+      - "20000:20000"  # Expõe a porta do servidor
+
+  client1:
+    build: .
+    container_name: client1
+    command: python -u Cliente.py
+    depends_on:
+      - server  # Garante que o servidor seja iniciado primeiro
+
+  client2:
+    build: .
+    container_name: client2
+    command: python -u Cliente.py
+    depends_on:
+      - server  # Garante que o servidor seja iniciado primeiro
+
+  client3:
+    build: .
+    container_name: client3
+    command: python -u Cliente.py
+    depends_on:
+      - server  # Garante que o servidor seja iniciado primeiro
+
+  client4:
+    build: .
+    container_name: client4
+    command: python -u Cliente.py
+    depends_on:
+      - server  # Garante que o servidor seja iniciado primeiro
+
+  
