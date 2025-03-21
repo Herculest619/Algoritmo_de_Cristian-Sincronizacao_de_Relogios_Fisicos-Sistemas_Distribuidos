@@ -26,7 +26,7 @@ python Cliente.py
 ### Construa as imagens e inicie os containers:
 
 ```bash
-docker-compose up --build
+docker-compose up --build -d
 ```
 ### Isso criará e iniciará os seguintes containers:
 
